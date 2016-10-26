@@ -12,7 +12,7 @@ localrules: all, clean, sra
 ## BEGIN RULES
 rule all:
     input:
-        expand("data/reads/{run}_il.fastq.gz", run=RUNS),
+        expand("data/reads/{run}.fastq.zst", run=RUNS),
 
 rule clean:
     shell:
@@ -34,11 +34,11 @@ rule dumpreads:
     input:
         "data/sra/{run}.sra",
     output:
-        "data/reads/{run}_il.fastq.gz",
+        temp("data/tmp/reads/{run}.fastq.zst"),
     log:
         "data/log/dumpreads/{run}.log"
     shell:
-        "( fastq-dump"
+        "(fastq-dump"
         "   --split-spot"
         "   --skip-technical"
         "   --stdout"
@@ -46,8 +46,19 @@ rule dumpreads:
         "   --defline-seq '@$sn/$ri'"
         "   --defline-qual '+'"
         "   {input}"
-        "| AdapterRemoval "
-        "   --file1 /dev/stdin"
+        "| zstd -1 -o {output})"
+        ">{log} 2>&1"
+
+rule qcreads:
+    input:
+        "data/tmp/reads/{run}.fastq.zst",
+    output:
+        "data/reads/{run}.fastq.zst",
+    log:
+        "data/log/dumpreads/{run}.log"
+    shell:
+        "(( AdapterRemoval "
+        "   --file1 <(zstdcat {input})"
         "   --output1 /dev/stdout"
         "   --interleaved"
         "   --combined-output"
@@ -58,5 +69,6 @@ rule dumpreads:
         "   -l 32"
         "   -g"
         "   -f /dev/stdin"
-        "   -o {output}"
-        ") >{log} 2>&1"
+        "   -o >(zstd -19 -o {output}) )"
+        "|| cp {input} {output} )"
+        ">{log} 2>&1"
