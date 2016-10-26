@@ -1,9 +1,10 @@
 #!/bin/bash
 # properties = {properties}
 
-set -euo pipefail
 
 . $HOME/.profile
 . /g/data1/xe2/.profile
+
+set -euo pipefail
 
 {exec_job}

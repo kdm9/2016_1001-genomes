@@ -1,8 +1,11 @@
-mkdir -p data/log/cluster
+logdir=data/log/cluster
+mkdir -p $logdir
+qsubargs="-l wd -o $logdir -e $logdir -P xe2"
 
 snakemake                                \
-    -j 150                               \
+    --keep-going                         \
+    -j 390                               \
     --cluster-config raijin/cluster.json \
     --js raijin/jobscript.sh             \
-    --cluster 'qsub -q {cluster.queue} -l ncpus={threads} -l walltime={cluster.time} -l mem={cluster.mem} {cluster.miscargs}'
+    --cluster "qsub -q {cluster.q} -l ncpus={threads} -l walltime={cluster.time} -l mem={cluster.mem} $qsubargs"
 

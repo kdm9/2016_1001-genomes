@@ -1,13 +1,12 @@
 {
     "__default__" :
     {
-	    "miscargs": " -l wd -o data/logs/cluster -e data/logs/cluster -P xe2",
         "time" : "00:05:00",
-        "queue" : "normal",
+        "q" : "normal",
         "mem": "1G"
     },
     "dumpreads" :
     {
-        "time" : "00:30:00"
+        "time" : "04:00:00"
     }
 }
