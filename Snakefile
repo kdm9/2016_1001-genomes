@@ -7,6 +7,8 @@ onerror:
     shell("mail -s 'Workflow error' kevin.murray@anu.edu.au < {log}")
 
 
+localrules: all, clean, sra
+
 ## BEGIN RULES
 rule all:
     input:
@@ -49,6 +51,7 @@ rule dumpreads:
         "   --output1 /dev/stdout"
         "   --interleaved"
         "   --combined-output"
+        "   --settings /dev/null"
         "| sickle se"
         "   -t sanger"
         "   -q 28"
