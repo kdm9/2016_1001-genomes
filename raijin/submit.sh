@@ -1,11 +1,12 @@
-logdir=data/log/cluster
+logdir=raijin/log
 mkdir -p $logdir
-qsubargs="-l wd -o $logdir -e $logdir -P xe2"
+QSUB="qsub -q {cluster.q} -l ncpus={threads} -l jobfs={cluster.jobfs}"
+QSUB="$QSUB -l walltime={cluster.time} -l mem={cluster.mem}"
+QSUB="$QSUB -l wd -o $logdir -e $logdir -P xe2"
 
 snakemake                                \
     --keep-going                         \
-    -j 390                               \
+    -j 250                               \
     --cluster-config raijin/cluster.json \
     --js raijin/jobscript.sh             \
-    --cluster "qsub -q {cluster.q} -l ncpus={threads} -l walltime={cluster.time} -l mem={cluster.mem} $qsubargs"
-
+    --cluster "$QSUB"

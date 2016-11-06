@@ -1,10 +1,8 @@
 #!/bin/bash
 # properties = {properties}
 
-
-. $HOME/.profile
-. /g/data1/xe2/.profile
-
 set -euo pipefail
+
+module load adapterremoval sra-toolkit sickle zstd khmer
 
 {exec_job}

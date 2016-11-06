@@ -13,6 +13,7 @@ localrules: all, clean, sra
 rule all:
     input:
         expand("data/reads/{run}.fastq.zst", run=RUNS),
+        expand("data/sketches/{run}.ct", run=RUNS),
 
 rule clean:
     shell:
@@ -46,7 +47,7 @@ rule dumpreads:
         "   --defline-seq '@$sn/$ri'"
         "   --defline-qual '+'"
         "   {input}"
-        "| zstd -1 -o {output})"
+        "| zstd --quiet -1 -o {output})"
         ">{log} 2>&1"
 
 rule qcreads:
@@ -55,10 +56,12 @@ rule qcreads:
     output:
         "data/reads/{run}.fastq.zst",
     log:
-        "data/log/dumpreads/{run}.log"
+        "data/log/qcreads/{run}.log"
+    threads:
+        4
     shell:
         "(( AdapterRemoval "
-        "   --file1 <(zstdcat {input})"
+        "   --file1 <(zstdcat --quiet {input})"
         "   --output1 /dev/stdout"
         "   --interleaved"
         "   --combined-output"
@@ -67,8 +70,32 @@ rule qcreads:
         "   -t sanger"
         "   -q 28"
         "   -l 32"
-        "   -g"
         "   -f /dev/stdin"
-        "   -o >(zstd -19 -o {output}) )"
-        "|| cp {input} {output} )"
+        "   -o >(pzstd -p {threads} -f -15 --quiet -o {output}) )"
+        "|| (zstdcat --quiet {input} | pzstd -f -p {threads} -15 --quiet -o {output}))"
         ">{log} 2>&1"
+
+rule sketchreads:
+    input:
+        "data/reads/{run}.fastq.zst",
+    output:
+        "data/sketches/{run}.ct",
+    log:
+        "data/log/sketchreads/{run}.log"
+    threads:
+        4
+    params:
+        mem=12e9,
+        k=31,
+    shell:
+        '(zstdcat --quiet {input} '
+        '| load-into-counting.py '
+        '    -M {params.mem} '
+        '    -k {params.k} '
+        '    -s tsv '
+        '    -b '
+        '    -f '
+        '    -T {threads} '
+        '    {output} '
+        '    - '
+        ') >{log} 2>&1 '

@@ -1,0 +1,17 @@
+---
+
+__default__:
+  time: 00:05:00
+  q: normal
+  mem: 1G
+  jobfs: 256G
+
+dumpreads:
+  time: 03:00:00
+
+qcreads:
+  time: 08:00:00
+
+sketchreads:
+  time: 04:00:00
+  mem: 15G
