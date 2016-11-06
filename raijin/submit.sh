@@ -7,6 +7,6 @@ QSUB="$QSUB -l wd -o $logdir -e $logdir -P xe2"
 snakemake                                \
     --keep-going                         \
     -j 250                               \
-    --cluster-config raijin/cluster.json \
+    --cluster-config raijin/cluster.yaml \
     --js raijin/jobscript.sh             \
     --cluster "$QSUB"

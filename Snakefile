@@ -1,3 +1,5 @@
+REFERENCE='refs/tair10/TAIR10'
+
 with open("metadata/srr_with_pheno_list.txt") as fh:
     RUNS = list(map(str.strip, fh.read().splitlines()))
 
@@ -12,8 +14,9 @@ localrules: all, clean, sra
 ## BEGIN RULES
 rule all:
     input:
-        expand("data/reads/{run}.fastq.zst", run=RUNS),
-        expand("data/sketches/{run}.ct", run=RUNS),
+        expand("data/reads/{run}.fastq.gz", run=RUNS),
+        expand("data/sketches/{run}.ct.gz", run=RUNS),
+        #expand("data/alignments/{run}.bam", run=RUNS),
 
 rule clean:
     shell:
@@ -54,7 +57,7 @@ rule qcreads:
     input:
         "data/tmp/reads/{run}.fastq.zst",
     output:
-        "data/reads/{run}.fastq.zst",
+        "data/reads/{run}.fastq.gz",
     log:
         "data/log/qcreads/{run}.log"
     threads:
@@ -71,15 +74,43 @@ rule qcreads:
         "   -q 28"
         "   -l 32"
         "   -f /dev/stdin"
-        "   -o >(pzstd -p {threads} -f -15 --quiet -o {output}) )"
-        "|| (zstdcat --quiet {input} | pzstd -f -p {threads} -15 --quiet -o {output}))"
+        "   -o >(gzip -9 > {output}) )"
+        "|| (zstdcat --quiet {input} | gzip -9 > {output}))"
         ">{log} 2>&1"
+
+rule align:
+    input:
+        ref=REFERENCE,
+        read="data/reads/{run}.fastq.gz",
+    output:
+        bam="data/alignments/{run}.bam",
+        bai="data/alignments/{run}.bam.bai",
+    log:
+        "data/logs/align/{run}.log"
+    threads: 16
+    shell:
+        "( bwa mem"
+        "   -p" # detect pairs in IL file
+        "   -R '@RG\\tID:{wildcards.run}\\tPL:ILLUMINA\\tSM:{wildcards.run}'"
+        "   -t {threads}"
+        "   {input.ref}"
+        "   {input.read}"
+        " | samtools view -Suh -"
+        " | samtools sort"
+        "    -T $PBS_JOBFS/{wildcards.run}"
+        "    -m 3G"
+        "    -o {output.bam}"
+        "    -" # stdin
+        " && samtools index {output.bam}"
+        " ) 2>{log}"
 
 rule sketchreads:
     input:
-        "data/reads/{run}.fastq.zst",
+        "data/reads/{run}.fastq.gz",
     output:
-        "data/sketches/{run}.ct",
+        ct="data/sketches/{run}.ct.gz",
+        tsv="data/sketches/{run}.ct.gz.info.tsv",
+        inf="data/sketches/{run}.ct.gz.info",
     log:
         "data/log/sketchreads/{run}.log"
     threads:
@@ -88,14 +119,13 @@ rule sketchreads:
         mem=12e9,
         k=31,
     shell:
-        '(zstdcat --quiet {input} '
-        '| load-into-counting.py '
+        'load-into-counting.py '
         '    -M {params.mem} '
         '    -k {params.k} '
         '    -s tsv '
         '    -b '
         '    -f '
         '    -T {threads} '
-        '    {output} '
-        '    - '
-        ') >{log} 2>&1 '
+        '    {output.ct} '
+        '    {input} '
+        '>{log} 2>&1 '
