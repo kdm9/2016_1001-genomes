@@ -3,9 +3,7 @@ mkdir -p $logdir
 
 if [ -d ".kdmwrappers/.git" ]
 then
-    pushd .kdmwrappers
-    git pull
-    popd
+    cd .kdmwrappers && git pull && cd ..
 else
     git clone 'https://github.com/kdmurray91/snakemake-wrappers.git' .kdmwrappers
 fi
