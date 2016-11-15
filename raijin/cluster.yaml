@@ -12,10 +12,6 @@ dumpreads:
 qcreads:
   time: 08:00:00
 
-sketchreads:
-  time: 08:00:00
-  mem: 15G
-
 bwamem:
   time: 06:00:00
   mem: 15G
@@ -23,3 +19,9 @@ bwamem:
 bamsort:
   time: 03:00:00
   mem: 31G
+  jobfs: 500G
+
+sketchreads:
+  time: 08:00:00
+  mem: 15G
+
