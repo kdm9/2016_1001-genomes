@@ -86,7 +86,7 @@ rule bamsort:
         "data/logs/bamsort/{run}.log"
     params:
         mem='3G',
-        tmpdir='$PBS_JOBFS'
+        tmpdir='${TMPDIR:-/tmp}'
     threads: 8
     wrapper:
         kdmwrap("samtools/sortidx")
