@@ -2,7 +2,7 @@
 
 __default__:
   time: 00:05:00
-  q: normal
+  q: express
   mem: 1G
   jobfs: 256G
 
@@ -13,5 +13,13 @@ qcreads:
   time: 08:00:00
 
 sketchreads:
-  time: 04:00:00
+  time: 08:00:00
   mem: 15G
+
+bwamem:
+  time: 06:00:00
+  mem: 15G
+
+bamsort:
+  time: 03:00:00
+  mem: 31G

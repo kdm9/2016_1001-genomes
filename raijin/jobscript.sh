@@ -3,6 +3,6 @@
 
 set -euo pipefail
 
-module load adapterremoval sra-toolkit sickle zstd khmer
+module load adapterremoval sra-toolkit sickle zstd khmer seqhax
 
 {exec_job}
