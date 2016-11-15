@@ -15,7 +15,6 @@ QSUB="$QSUB -l walltime={cluster.time} -l mem={cluster.mem}"
 QSUB="$QSUB -l wd -o $logdir -e $logdir -P xe2"
 
 snakemake                                \
-    --keep-going                         \
     -j 300                               \
     --cluster-config raijin/cluster.yaml \
     --js raijin/jobscript.sh             \
