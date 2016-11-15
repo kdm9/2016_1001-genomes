@@ -2,12 +2,8 @@ REFERENCE='refs/tair10/TAIR10'
 
 with open("metadata/srr_with_pheno_list.txt") as fh:
     RUNS = list(map(str.strip, fh.read().splitlines()))
-RUNS=['ERR1720545'] # testing tiny SRA
 
-#onsuccess:
-#    shell("mail -s 'Workflow complete' kevin.murray@anu.edu.au < {log}")
-#onerror:
-#    shell("mail -s 'Workflow error' kevin.murray@anu.edu.au < {log}")
+# RUNS=['ERR1720545'] # testing tiny SRA
 
 def kdmwrap(wrapper):
     local = ".kdmwrappers/" + wrapper
