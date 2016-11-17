@@ -27,7 +27,7 @@ rule sra:
     output:
         "data/sra/{run}.sra",
     log:
-        "data/log/getrun/{run}.log"
+        "data/logs/getrun/{run}.log"
     shell:
         "get-run.py"
         "   -d data/sra/"
@@ -41,7 +41,7 @@ rule dumpreads:
     output:
         temp("data/tmp/reads/{run}.fastq"),
     log:
-        "data/log/dumpreads/{run}.log"
+        "data/logs/dumpreads/{run}.log"
     params:
         compressor="cat" # no compression
     wrapper:
@@ -53,7 +53,7 @@ rule qcreads:
     output:
         "data/reads/{run}.fastq.gz",
     log:
-        "data/log/qcreads/{run}.log"
+        "data/logs/qcreads/{run}.log"
     params:
         extra='-q 28 -l 32 -z',
         qual_type="sanger",
@@ -85,9 +85,9 @@ rule bamsort:
     log:
         "data/logs/bamsort/{run}.log"
     params:
-        mem='3G',
+        mem='20G',
         tmpdir='${TMPDIR:-/tmp}'
-    threads: 8
+    threads: 1
     wrapper:
         kdmwrap("samtools/sortidx")
 
@@ -100,9 +100,9 @@ rule sketchreads:
         tsv="data/sketches/{run}.ct.gz.info.tsv",
         inf="data/sketches/{run}.ct.gz.info",
     log:
-        "data/log/sketchreads/{run}.log"
+        "data/logs/sketchreads/{run}.log"
     threads:
-        8
+        4
     params:
         mem=12e9,
         k=31,

@@ -16,4 +16,5 @@ snakemake                                \
     -j 300                               \
     --cluster-config raijin/cluster.yaml \
     --js raijin/jobscript.sh             \
+    --rerun-incomplete                   \
     --cluster "$QSUB" $@

@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-module load adapterremoval sra-toolkit sickle zstd khmer seqhax
+module load adapterremoval sra-toolkit sickle zstd khmer seqhax bwa samtools
 
 export TMPDIR=$PBS_JOBFS
 

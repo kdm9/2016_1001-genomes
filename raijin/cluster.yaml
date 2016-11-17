@@ -15,7 +15,7 @@ bwamem:
   mem: 15G
 
 bamsort:
-  time: 03:00:00
+  time: 02:00:00
   mem: 31G
   jobfs: 500G
 
