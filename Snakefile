@@ -1,9 +1,13 @@
-REFERENCE='refs/tair10/TAIR10'
+REFERENCES={
+    "tair10": lambda wc: 'refs/tair10/TAIR10.fa',
+    "chloro": lambda wc: "data/chloroplasts/{}.fasta".format(wc.run)
+}
 
 with open("metadata/srr_with_pheno_list.txt") as fh:
     RUNS = list(map(str.strip, fh.read().splitlines()))
 
 # RUNS=['ERR1720545'] # testing tiny SRA
+# RUNS=['SRR1946065', 'SRR1946067'] # Col and CVI resp.
 
 def kdmwrap(wrapper):
     local = ".kdmwrappers/" + wrapper
@@ -11,13 +15,19 @@ def kdmwrap(wrapper):
         return "file://" + local
     return "https://github.com/kdmurray91/snakemake-wrappers/raw/master/" + wrapper
 
+shell.executable("/bin/bash")
+# bash "safe mode"
+shell.prefix("set -euo pipefail; ")
+
 localrules: all, clean, sra
 
 ## BEGIN RULES
 rule all:
     input:
         expand("data/sketches/{run}.ct.gz", run=RUNS),
-        expand("data/alignments/{run}.bam", run=RUNS),
+        expand("data/alignments/tair10/{run}.bam", run=RUNS),
+        expand("data/alignments/chloro/{run}.bam", run=RUNS),
+        expand("data/chloroplasts/{run}.fasta", run=RUNS),
 
 rule clean:
     shell:
@@ -60,37 +70,6 @@ rule qcreads:
     wrapper:
         kdmwrap("sickle/se")
 
-rule bwamem:
-    input:
-        ref=REFERENCE,
-        sample=["data/reads/{run}.fastq.gz",],
-    output:
-        temp("data/tmp/aln_unsort/{run}.bam"),
-    log:
-        "data/logs/align/{run}.log"
-    params:
-        rgid=lambda wc: wc.run,
-        extra="-p",
-    threads: 16
-    wrapper:
-        kdmwrap("bwa/mem")
-
-
-rule bamsort:
-    input:
-        "data/tmp/aln_unsort/{run}.bam"
-    output:
-        "data/alignments/{run}.bam",
-        "data/alignments/{run}.bam.bai",
-    log:
-        "data/logs/bamsort/{run}.log"
-    params:
-        mem='20G',
-        tmpdir='${TMPDIR:-/tmp}'
-    threads: 1
-    wrapper:
-        kdmwrap("samtools/sortidx")
-
 
 rule sketchreads:
     input:
@@ -117,3 +96,78 @@ rule sketchreads:
         '    {output.ct}'
         '    {input}'
         '>{log} 2>&1'
+
+rule mitobim:
+    input:
+        reads="data/reads/{run}.fastq.gz",
+        bait="refs/tair10/chloroplast.fasta",
+    output:
+        tarball="data/chloroplasts/{run}.tar.gz",
+        fasta="data/chloroplasts/{run}.fasta"
+    log:
+        "data/logs/mitobim/{run}.log"
+    threads:
+        1
+    shell:
+        "(export WKDIR=$PWD;"
+        " rm -rf $PBS_JOBFS/{wildcards.run}"
+        " && mkdir $PBS_JOBFS/{wildcards.run}"
+        " && cd $PBS_JOBFS/{wildcards.run}"
+        " && mitobim"
+        "   -start 1"
+        "   -end 10"
+        "   -sample {wildcards.run}"
+        "   -ref bait"
+        "   -readpool $WKDIR/{input.reads}"
+        "   --quick $WKDIR/{input.bait}"
+        "   --verbose"
+        "   --pair"
+        "   --symlink-final"
+        " && cp final_iteration/*_assembly/*_d_results/*_out_AllStrains.unpadded.fasta"
+        "      $WKDIR/{output.fasta}"
+        " && (find -type d -and -name \*_chkpt -or -name \*_tmp | xargs rm -rf )"
+        " && tar cvzf $WKDIR/{output.tarball} ."
+        "; unset WKDIR) >{log} 2>&1"
+
+rule bwaidx:
+    input:
+        "{fasta,.+(fasta|fa)}"
+    output:
+        "{fasta}.bwt"
+    threads: 1
+    shell:
+        "bwa index {input} && "
+        "samtools faidx {input}"
+
+
+rule bwamem:
+    input:
+        ref=lambda w: REFERENCES[w.ref](w),
+        sample=["data/reads/{run}.fastq.gz",],
+        refidx=lambda w: REFERENCES[w.ref](w) + '.bwt',
+    output:
+        temp("data/tmp/aln_unsort/{ref}/{run}.bam"),
+    log:
+        "data/logs/align/{ref}/{run}.log"
+    params:
+        rgid=lambda wc: wc.run,
+        extra="-p",
+    threads: 16
+    wrapper:
+        kdmwrap("bwa/mem")
+
+
+rule bamsort:
+    input:
+        "data/tmp/aln_unsort/{ref}/{run}.bam"
+    output:
+        "data/alignments/{ref}/{run}.bam",
+        "data/alignments/{ref}/{run}.bam.bai",
+    log:
+        "data/logs/bamsort/{ref}/{run}.log"
+    params:
+        mem='20G',
+        tmpdir='${TMPDIR:-/tmp}'
+    threads: 1
+    wrapper:
+        kdmwrap("samtools/sortidx")

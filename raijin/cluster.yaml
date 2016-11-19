@@ -14,6 +14,10 @@ bwamem:
   time: 06:00:00
   mem: 15G
 
+bwamem:
+  time: 01:00:00
+  mem: 5G
+
 bamsort:
   time: 02:00:00
   mem: 31G
@@ -22,3 +26,7 @@ bamsort:
 sketchreads:
   time: 08:00:00
   mem: 15G
+
+mitobim:
+  time: 08:00:00
+  mem: 48G
