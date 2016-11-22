@@ -3,6 +3,7 @@ REFERENCES={
     "chloro": lambda wc: "data/chloroplasts/{}.fasta".format(wc.run)
 }
 
+# Original
 with open("metadata/srr_with_pheno_list.txt") as fh:
     RUNS = list(map(str.strip, fh.read().splitlines()))
 
@@ -108,14 +109,16 @@ rule mitobim:
         "data/logs/mitobim/{run}.log"
     threads:
         1
+    priority:
+        -1
     shell:
         "(export WKDIR=$PWD;"
-        " rm -rf $PBS_JOBFS/{wildcards.run}"
-        " && mkdir $PBS_JOBFS/{wildcards.run}"
-        " && cd $PBS_JOBFS/{wildcards.run}"
+        " rm -rf $TMPDIR/{wildcards.run}"
+        " && mkdir $TMPDIR/{wildcards.run}"
+        " && cd $TMPDIR/{wildcards.run}"
         " && mitobim"
         "   -start 1"
-        "   -end 10"
+        "   -end 5"
         "   -sample {wildcards.run}"
         "   -ref bait"
         "   -readpool $WKDIR/{input.reads}"
@@ -131,9 +134,10 @@ rule mitobim:
 
 rule bwaidx:
     input:
-        "{fasta,.+(fasta|fa)}"
+        "{fasta}"
     output:
-        "{fasta}.bwt"
+        "{fasta}.bwt",
+        "{fasta}.fai",
     threads: 1
     shell:
         "bwa index {input} && "
