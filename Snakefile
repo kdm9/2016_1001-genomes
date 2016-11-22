@@ -156,7 +156,7 @@ rule bwamem:
     params:
         rgid=lambda wc: wc.run,
         extra="-p",
-    threads: 16
+    threads: 8
     wrapper:
         kdmwrap("bwa/mem")
 

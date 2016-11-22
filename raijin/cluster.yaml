@@ -14,8 +14,8 @@ bwamem:
   time: 06:00:00
   mem: 15G
 
-bwamem:
-  time: 01:00:00
+bwaidx:
+  time: 00:20:00
   mem: 5G
 
 bamsort:
