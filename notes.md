@@ -27,8 +27,8 @@ Using mitobim to try assembling the chloroplast of Col-0 (SRR1946065) and Cvi
 
 # 2016-11-22
 
-Things seem to be crashing due to both walltime and RAM limits. Reducing
-maximum number of iterations to 10 and increasing ram to 63G. Also setting the
+Mitobim seems to be crashing due to both walltime and RAM limits. Reducing
+maximum number of iterations to 5 and increasing ram to 63G. Also setting the
 priotity of Mitobim runs to -1, so other parts are run first. This should mean
 we can analyse the chloroplast re-mapping pipeline for those who have
 chloroplasts sooner.
