@@ -126,10 +126,10 @@ rule mitobim:
         "   --verbose"
         "   --pair"
         "   --symlink-final"
-        " && cp final_iteration/*_assembly/*_d_results/*_out_AllStrains.unpadded.fasta"
-        "      $WKDIR/{output.fasta}"
         " && (find -type d -and -name \*_chkpt -or -name \*_tmp | xargs rm -rf )"
         " && tar cvzf $WKDIR/{output.tarball} ."
+        " && cp final_iteration/*_assembly/*_d_results/*_out_AllStrains.unpadded.fasta"
+        "      $WKDIR/{output.fasta}"
         "; unset WKDIR) >{log} 2>&1"
 
 rule bwaidx:
