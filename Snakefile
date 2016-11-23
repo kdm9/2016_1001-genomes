@@ -66,7 +66,7 @@ rule qcreads:
     log:
         "data/logs/qcreads/{run}.log"
     params:
-        extra='-q 28 -l 32 -z',
+        extra='-q 28 -l 32 -g',
         qual_type="sanger",
     wrapper:
         kdmwrap("sickle/se")
