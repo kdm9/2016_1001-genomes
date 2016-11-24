@@ -4,8 +4,9 @@ Data
 - The 1135 Ath lines from SRA. https://www.ncbi.nlm.nih.gov/bioproject/273563
 - Phenotype data from https://arapheno.1001genomes.org/
 
+# Chloroplast extraction
 
-# 2016-11-18
+## 2016-11-18
 
 Mitobim experiments
 
@@ -25,7 +26,7 @@ Using mitobim to try assembling the chloroplast of Col-0 (SRR1946065) and Cvi
   --redirect_tmp $PBS_JOBFS`
 * Assembled a full contig of the chloroplast
 
-# 2016-11-22
+## 2016-11-22
 
 Mitobim seems to be crashing due to both walltime and RAM limits. Reducing
 maximum number of iterations to 5 and increasing ram to 63G. Also setting the

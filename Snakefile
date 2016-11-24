@@ -4,7 +4,8 @@ REFERENCES={
 }
 
 # Original
-with open("metadata/srr_with_pheno_list.txt") as fh:
+#with open("metadata/srr_with_pheno_list.txt") as fh:
+with open("chl_present.txt") as fh:
     RUNS = list(map(str.strip, fh.read().splitlines()))
 
 # RUNS=['ERR1720545'] # testing tiny SRA
@@ -103,7 +104,6 @@ rule mitobim:
         reads="data/reads/{run}.fastq.gz",
         bait="refs/tair10/chloroplast.fasta",
     output:
-        tarball="data/chloroplasts/{run}.tar.gz",
         fasta="data/chloroplasts/{run}.fasta"
     log:
         "data/logs/mitobim/{run}.log"
@@ -123,11 +123,10 @@ rule mitobim:
         "   -ref bait"
         "   -readpool $WKDIR/{input.reads}"
         "   --quick $WKDIR/{input.bait}"
-        "   --verbose"
         "   --pair"
         "   --symlink-final"
         " && (find -type d -and -name \*_chkpt -or -name \*_tmp | xargs rm -rf )"
-        " && tar cvzf $WKDIR/{output.tarball} ."
+        " && tar cvzf $WKDIR/data/chloroplasts/{wildcards.run}.tar.gz ."
         " && cp final_iteration/*_assembly/*_d_results/*_out_AllStrains.unpadded.fasta"
         "      $WKDIR/{output.fasta}"
         "; unset WKDIR) >{log} 2>&1"
